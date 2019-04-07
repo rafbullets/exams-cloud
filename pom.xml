@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>raf.bullets</groupId>
-	<artifactId>storage</artifactId>
+	<artifactId>exams-cloud</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>storage</name>
 	<description>Demo project for Spring Boot</description>
