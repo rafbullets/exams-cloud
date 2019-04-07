@@ -10,8 +10,9 @@ import java.util.List;
 public class TestController {
 
     @RequestMapping("/test")
-    public List<String> sayHay() {
+    public List<String> say() {
         List<String> list = new ArrayList<>();
+        List<String> arrayList = new ArrayList<>();
         list.add("test1");
         list.add("test2");
         return list;
