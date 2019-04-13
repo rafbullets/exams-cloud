@@ -2,13 +2,19 @@ package raf.bullets.storage.service.impl;
 
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
 import raf.bullets.storage.dto.FileType;
 import raf.bullets.storage.modked_data.FilesMockery;
 import raf.bullets.storage.service.FileStorageService;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
@@ -44,6 +50,18 @@ public class FileStorageServiceImpl implements FileStorageService {
         //TODO: Create new folder in storage!
 
         return FilesMockery.newFolder(path, name);
+    }
+
+    @Override
+    public void storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException {
+        //TODO: Store file using component
+
+        File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        FileOutputStream fos = new FileOutputStream(convFile);
+        fos.write(multipartFile.getBytes());
+        fos.close();
+
+        convFile.renameTo(new File("./tmp/"+multipartFile.getOriginalFilename()));
     }
 
 

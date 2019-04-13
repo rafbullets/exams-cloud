@@ -1,15 +1,21 @@
 package raf.bullets.storage.controller;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
 import raf.bullets.storage.service.FileStorageService;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/files")
@@ -26,6 +32,15 @@ public class FileController {
     public ResponseEntity<List<FileEntity>> getFiles(@RequestParam("path") String path) {
         return new ResponseEntity<>(this.fileStorageService.findInPath(path), HttpStatus.OK);
     }
+
+//    @PostMapping("/upload")
+//    public ResponseEntity uploadFiles(@RequestParam("file") MultipartFile multipartFile,
+//                                      @RequestParam("path") String path,
+//                                      @RequestParam(value = "archive", required = false) boolean asArchive) throws IOException {
+//
+//        this.fileStorageService.storeFile(multipartFile, path, asArchive);
+//        return new ResponseEntity(HttpStatus.CREATED);
+//    }
 
     @PostMapping("/rename")
     public ResponseEntity<FileEntity> renameFile(@RequestParam("path") String path,

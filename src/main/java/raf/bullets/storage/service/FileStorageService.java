@@ -2,8 +2,10 @@ package raf.bullets.storage.service;
 
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -19,4 +21,5 @@ public interface FileStorageService {
 
     public FileEntity newFolder(String path, String name);
 
+    public void storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException;
 }
