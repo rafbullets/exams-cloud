@@ -57,11 +57,13 @@ public class FileStorageServiceImpl implements FileStorageService {
         //TODO: Store file using component
 
         File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+//        convFile.createNewFile();
         FileOutputStream fos = new FileOutputStream(convFile);
         fos.write(multipartFile.getBytes());
         fos.close();
 
-        convFile.renameTo(new File("./tmp/"+multipartFile.getOriginalFilename()));
+        new File("./tmp/"+path+"/").mkdirs();
+        convFile.renameTo(new File("./tmp/"+path+"/"+multipartFile.getOriginalFilename()));
     }
 
 

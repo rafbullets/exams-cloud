@@ -4,30 +4,28 @@ import raf.bullets.storage.dto.FileEntity;
 import raf.bullets.storage.dto.FileType;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FilesMockery {
-    private static FileEntity[] fileEntitiesArray = {
-        new FileEntity(File.separator, "UUP", FileType.FOLDER),
-        new FileEntity(File.separator, "subfolder", FileType.FOLDER),
-        new FileEntity(File.separator+"subfolder"+File.separator, "test.txt", FileType.FILE),
-        new FileEntity(File.separator, "bobek.go", FileType.FILE),
-        new FileEntity(File.separator, "antole.php", FileType.FILE),
-        new FileEntity(File.separator, "tudu.php", FileType.FILE)
-    };
 
-    private static ArrayList<FileEntity> fileEntities = new ArrayList<>(Arrays.asList(fileEntitiesArray));
-
-    public static synchronized void addFile(FileEntity fileEntity){
-        fileEntities.add(fileEntity);
-    }
+    private static String STORAGE_FOLDER = "./tmp";
 
     public static ArrayList<FileEntity> findInPath(String path) {
         ArrayList<FileEntity> filesInPath = new ArrayList<>();
-        for (FileEntity fileEntity : fileEntities) {
-            if(fileEntity.getPath().equals(path)) {
-                filesInPath.add(fileEntity);
+
+        //If this pathname does not denote a directory, then listFiles() returns null.
+        File[] files = new File(STORAGE_FOLDER+File.separator+path).listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                filesInPath.add(new FileEntity(path, file.getName(), file.isFile()?FileType.FILE:FileType.FOLDER));
             }
         }
 
@@ -35,41 +33,29 @@ public class FilesMockery {
     }
 
     public static synchronized FileEntity rename(String path, String oldName, String newName) throws Exception {
-        FileEntity newFileEntity = null;
-        for (FileEntity fileEntity:fileEntities) {
-            if(fileEntity.getPath().equals(path) && fileEntity.getName().equals(oldName)) {
-                fileEntity.setName(newName);
-                newFileEntity = fileEntity;
-                break;
-            }
-        }
 
-        if (newFileEntity == null) {
+        File file = new File(STORAGE_FOLDER+File.separator+path+File.separator+oldName);
+
+        if(!file.renameTo(new File(STORAGE_FOLDER+File.separator+path+File.separator+newName))) {
             throw new Exception("Can not find the file on the given path.");
         }
 
-        return newFileEntity;
+        return new FileEntity(path, newName, file.isFile()?FileType.FILE:FileType.FOLDER);
+
     }
 
     public static synchronized void delete(String path, String name) throws Exception {
-        FileEntity deleteFileEntity = null;
-        for (FileEntity fileEntity : fileEntities) {
-            if(fileEntity.getPath().equals(path) && fileEntity.getName().equals(name)) {
-                deleteFileEntity = fileEntity;
-            }
-        }
 
-        if(deleteFileEntity == null) {
+        File file = new File(STORAGE_FOLDER+File.separator+path+File.separator+name);
+
+        if(!file.delete()) {
             throw new Exception("Can not find the file on the given path.");
         }
-
-        fileEntities.remove(deleteFileEntity);
     }
 
     public static synchronized FileEntity newFolder(String path, String name) {
-        FileEntity fileEntity = new FileEntity(path, name, FileType.FOLDER);
-        fileEntities.add(fileEntity);
+        new File(STORAGE_FOLDER+File.separator+path+File.separator+name).mkdirs();
 
-        return fileEntity;
+        return new FileEntity(path, name, FileType.FOLDER);
     }
 }
