@@ -53,17 +53,22 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException {
-        //TODO: Store file using component
+    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path, boolean asArchive) throws IOException {
+        //TODO: Store file using component and archive if it is requested
 
-        File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-//        convFile.createNewFile();
-        FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(multipartFile.getBytes());
-        fos.close();
+        ArrayList<File> files = new ArrayList<>(multipartFiles.length);
 
-        new File("./tmp/"+path+"/").mkdirs();
-        convFile.renameTo(new File("./tmp/"+path+"/"+multipartFile.getOriginalFilename()));
+        for (MultipartFile multipartFile : multipartFiles) {
+            File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+//            convFile.createNewFile();
+            FileOutputStream fos = new FileOutputStream(convFile);
+            fos.write(multipartFile.getBytes());
+            fos.close();
+
+            files.add(convFile);
+        }
+
+        return FilesMockery.newFiles(files, path);
     }
 
 

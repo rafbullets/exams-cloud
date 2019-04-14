@@ -33,14 +33,13 @@ public class FileController {
         return new ResponseEntity<>(this.fileStorageService.findInPath(path), HttpStatus.OK);
     }
 
-//    @PostMapping("/upload")
-//    public ResponseEntity uploadFiles(@RequestParam("file") MultipartFile multipartFile,
-//                                      @RequestParam("path") String path,
-//                                      @RequestParam(value = "archive", required = false) boolean asArchive) throws IOException {
-//
-//        this.fileStorageService.storeFile(multipartFile, path, asArchive);
-//        return new ResponseEntity(HttpStatus.CREATED);
-//    }
+    @PostMapping("/upload")
+    public ResponseEntity<List<FileEntity>> uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles,
+                                      @RequestParam("path") String path,
+                                      @RequestParam(value = "archive", required = false) boolean asArchive) throws IOException {
+
+        return new ResponseEntity<>(this.fileStorageService.storeFiles(multipartFiles, path, asArchive), HttpStatus.CREATED);
+    }
 
     @PostMapping("/rename")
     public ResponseEntity<FileEntity> renameFile(@RequestParam("path") String path,

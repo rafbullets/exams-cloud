@@ -21,5 +21,5 @@ public interface FileStorageService {
 
     public FileEntity newFolder(String path, String name);
 
-    public void storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException;
+    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path, boolean asArchive) throws IOException;
 }
