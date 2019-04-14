@@ -1,6 +1,7 @@
 package raf.bullets.storage.service.impl;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,8 +22,10 @@ import java.util.Objects;
 public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
-    public Resource getFileAsResource() {
-        return null;
+    public Resource getFileAsResource(String name, String path) throws MalformedURLException {
+        File file1 = FilesMockery.findFile(name, path);
+
+        return new UrlResource(file1.toURI());
     }
 
     @Override

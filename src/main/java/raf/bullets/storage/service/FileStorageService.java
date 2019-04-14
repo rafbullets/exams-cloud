@@ -6,12 +6,11 @@ import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 @Service
 public interface FileStorageService {
-
-    public Resource getFileAsResource();
 
     public List<FileEntity> findInPath(String path);
 
@@ -22,4 +21,7 @@ public interface FileStorageService {
     public FileEntity newFolder(String path, String name);
 
     public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path, boolean asArchive) throws IOException;
+
+    public Resource getFileAsResource(String name, String path) throws MalformedURLException;
+
 }

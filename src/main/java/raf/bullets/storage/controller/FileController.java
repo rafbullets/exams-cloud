@@ -1,15 +1,20 @@
 package raf.bullets.storage.controller;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
 import raf.bullets.storage.service.FileStorageService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -31,6 +36,27 @@ public class FileController {
     @RequestMapping(value = "", method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseEntity<List<FileEntity>> getFiles(@RequestParam("path") String path) {
         return new ResponseEntity<>(this.fileStorageService.findInPath(path), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/download", method = { RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<Resource> downloadFile(@RequestParam("name") String name,
+                                                 @RequestParam("path") String path,
+                                                 HttpServletRequest request) throws IOException {
+        // Load file as Resource
+        Resource resource = this.fileStorageService.getFileAsResource(name, path);
+
+
+        String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+
+        // Fallback to the default content type if type could not be determined
+        if(contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 
     @PostMapping("/upload")

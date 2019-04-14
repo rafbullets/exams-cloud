@@ -30,6 +30,10 @@ public class FilesMockery {
         return fileEntities;
     }
 
+    public static File findFile(String name, String path) {
+        return new File(STORAGE_FOLDER+File.separator+path+File.separator+name);
+    }
+
     public static FileEntity newFile(File file, String path) {
         new File("./tmp/"+path+"/").mkdirs();
         file.renameTo(new File(STORAGE_FOLDER+File.separator+path+File.separator+file.getName()));
@@ -38,15 +42,14 @@ public class FilesMockery {
     }
 
     public static ArrayList<FileEntity> findInPath(String path) {
-        ArrayList<FileEntity> filesInPath = new ArrayList<>();
 
         //If this pathname does not denote a directory, then listFiles() returns null.
         File[] files = new File(STORAGE_FOLDER+File.separator+path).listFiles();
 
-        if (files != null) {
-            for (File file : files) {
-                filesInPath.add(new FileEntity(path, file.getName(), file.isFile()?FileType.FILE:FileType.FOLDER));
-            }
+        ArrayList<FileEntity> filesInPath = new ArrayList<>(files.length);
+
+        for (File file : files) {
+            filesInPath.add(new FileEntity(path, file.getName(), file.isFile()?FileType.FILE:FileType.FOLDER));
         }
 
         return filesInPath;
