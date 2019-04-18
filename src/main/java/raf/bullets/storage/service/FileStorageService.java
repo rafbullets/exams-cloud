@@ -16,12 +16,20 @@ public interface FileStorageService {
 
     public FileEntity rename(String path, String oldName, String newName) throws Exception;
 
-    public void delete(String path, String name) throws Exception;
+    public boolean delete(String path, String name) throws Exception;
 
     public FileEntity newFolder(String path, String name);
+
+    public FileEntity storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException;
 
     public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path, boolean asArchive) throws IOException;
 
     public Resource getFileAsResource(String name, String path) throws MalformedURLException;
+
+    public String generateLink(String sourcePath, String uploadDestinationPath);
+
+    public List<FileEntity> findInEncryptedPath(String encryptedPath);
+
+    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws IOException;
 
 }

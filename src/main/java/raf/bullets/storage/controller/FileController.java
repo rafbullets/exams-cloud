@@ -8,19 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
+import raf.bullets.storage.dto.responses.GeneratedLinkResponse;
 import raf.bullets.storage.service.FileStorageService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/files")
@@ -59,10 +52,10 @@ public class FileController {
                 .body(resource);
     }
 
-    @PostMapping("/upload")
+    @PostMapping(value =  "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<List<FileEntity>> uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles,
-                                      @RequestParam("path") String path,
-                                      @RequestParam(value = "archive", required = false) boolean asArchive) throws IOException {
+                                                        @RequestParam("path") String path,
+                                                        @RequestParam(value = "archive", required = false) boolean asArchive) throws IOException {
 
         return new ResponseEntity<>(this.fileStorageService.storeFiles(multipartFiles, path, asArchive), HttpStatus.CREATED);
     }
@@ -87,4 +80,24 @@ public class FileController {
         return new ResponseEntity<>(this.fileStorageService.newFolder(path, name), HttpStatus.CREATED);
     }
 
+    @RequestMapping(value = "link", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<GeneratedLinkResponse> generateLink(@RequestParam("source_path") String sourcePath,
+                                                              @RequestParam("upload_destination_path") String uploadDestinationPath) {
+
+        return new ResponseEntity<>(new GeneratedLinkResponse(this.fileStorageService.generateLink(sourcePath, uploadDestinationPath)), HttpStatus.CREATED);
+    }
+
+    @GetMapping("link/{encrypted_path}")
+    public ResponseEntity<List<FileEntity>> listFilesFromLinkedFolder(@PathVariable("encrypted_path") String encryptedPath) {
+
+        return new ResponseEntity<>(this.fileStorageService.findInEncryptedPath(encryptedPath), HttpStatus.OK);
+    }
+
+    @PostMapping("link/{encrypted_path}")
+    public ResponseEntity uploadFileForLinkedFolder(@RequestParam("file") MultipartFile multipartFile,
+                                                    @PathVariable("encrypted_path") String encryptedPath) throws IOException {
+
+        this.fileStorageService.uploadToEncryptedPath(multipartFile, encryptedPath);
+        return new ResponseEntity(HttpStatus.ACCEPTED);
+    }
 }

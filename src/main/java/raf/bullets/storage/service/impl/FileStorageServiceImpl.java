@@ -5,18 +5,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
-import raf.bullets.storage.dto.FileType;
 import raf.bullets.storage.modked_data.FilesMockery;
 import raf.bullets.storage.service.FileStorageService;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
@@ -43,10 +37,11 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void delete(String path, String name) throws Exception {
+    public boolean delete(String path, String name) throws Exception {
         //TODO: Delete a file from storage
 
         FilesMockery.delete(path, name);
+        return true;
     }
 
     @Override
@@ -57,23 +52,63 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
+    public FileEntity storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException {
+        //TODO: Store file using component and archive if it is requested
+
+        File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+//            convFile.createNewFile();
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(multipartFile.getBytes());
+        fos.close();
+
+        return FilesMockery.newFile(file, path);
+    }
+
+    @Override
     public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path, boolean asArchive) throws IOException {
         //TODO: Store file using component and archive if it is requested
 
         ArrayList<File> files = new ArrayList<>(multipartFiles.length);
 
         for (MultipartFile multipartFile : multipartFiles) {
-            File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+            File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
 //            convFile.createNewFile();
-            FileOutputStream fos = new FileOutputStream(convFile);
+            FileOutputStream fos = new FileOutputStream(file);
             fos.write(multipartFile.getBytes());
             fos.close();
 
-            files.add(convFile);
+
+            files.add(file);
         }
+
 
         return FilesMockery.newFiles(files, path);
     }
 
+    @Override
+    public String generateLink(String sourcePath, String uploadDestinationPath) {
+        //TODO: store uploadDestinationPath as metadata
+
+        //TODO: get base url from config.
+        return "http://localhost:8080/files/link/"+Base64.getUrlEncoder().encodeToString(sourcePath.getBytes());
+    }
+
+    @Override
+    public List<FileEntity> findInEncryptedPath(String encryptedPath) {
+        byte[] decodedBytes = Base64.getUrlDecoder().decode(encryptedPath);
+        String decryptedPath = new String(decodedBytes);
+
+        return this.findInPath(decryptedPath);
+    }
+
+    @Override
+    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws IOException {
+        byte[] decodedBytes = Base64.getUrlDecoder().decode(encryptedPath);
+        String decryptedPath = new String(decodedBytes);
+        //TODO: get destination path from file metadata
+        String destinationPath = "upload_destination";
+
+        return this.storeFile(multipartFile, destinationPath, false);
+    }
 
 }
