@@ -1,19 +1,28 @@
 package raf.bullets.storage.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
+import raf.bullets.storage.helper.Helper;
 import raf.bullets.storage.modked_data.FilesMockery;
 import raf.bullets.storage.service.FileStorageService;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
+
+    @Autowired
+    private Environment environment;
 
     @Override
     public Resource getFileAsResource(String name, String path) throws MalformedURLException {
@@ -56,10 +65,30 @@ public class FileStorageServiceImpl implements FileStorageService {
         //TODO: Store file using component and archive if it is requested
 
         File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-//            convFile.createNewFile();
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(multipartFile.getBytes());
-        fos.close();
+
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+        fileOutputStream.write(multipartFile.getBytes());
+        fileOutputStream.close();
+
+        if(asArchive) {
+            File fileForZip = new File(file.getName()+".zip");
+            FileOutputStream fos = new FileOutputStream(fileForZip);
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+
+            FileInputStream fis = new FileInputStream(file);
+            ZipEntry zipEntry = new ZipEntry(file.getName());
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            zipOut.close();
+            fis.close();
+            fos.close();
+
+            file = fileForZip;
+        }
 
         return FilesMockery.newFile(file, path);
     }
@@ -81,22 +110,42 @@ public class FileStorageServiceImpl implements FileStorageService {
             files.add(file);
         }
 
+        if(asArchive) {
+            File fileForZip = new File("multiCompressed.zip");
+            FileOutputStream fos = new FileOutputStream(fileForZip);
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            for (File file : files) {
+                FileInputStream fis = new FileInputStream(file);
+                ZipEntry zipEntry = new ZipEntry(file.getName());
+                zipOut.putNextEntry(zipEntry);
+
+                byte[] bytes = new byte[1024];
+                int length;
+                while((length = fis.read(bytes)) >= 0) {
+                    zipOut.write(bytes, 0, length);
+                }
+                fis.close();
+            }
+            zipOut.close();
+            fos.close();
+
+            files.clear();
+            files.add(fileForZip);
+        }
 
         return FilesMockery.newFiles(files, path);
     }
 
     @Override
-    public String generateLink(String sourcePath, String uploadDestinationPath) {
+    public String generateFolderLink(String sourcePath, String uploadDestinationPath) {
         //TODO: store uploadDestinationPath as metadata
 
-        //TODO: get base url from config.
-        return "http://localhost:8080/files/link/"+Base64.getUrlEncoder().encodeToString(sourcePath.getBytes());
+        return Helper.url("/link/"+Helper.base64Encode(sourcePath));
     }
 
     @Override
     public List<FileEntity> findInEncryptedPath(String encryptedPath) {
-        byte[] decodedBytes = Base64.getUrlDecoder().decode(encryptedPath);
-        String decryptedPath = new String(decodedBytes);
+        String decryptedPath = Helper.base64Decode(encryptedPath);
 
         return this.findInPath(decryptedPath);
     }
@@ -105,7 +154,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws IOException {
         byte[] decodedBytes = Base64.getUrlDecoder().decode(encryptedPath);
         String decryptedPath = new String(decodedBytes);
-        //TODO: get destination path from file metadata
+        //TODO: get destination path from file's metadata
         String destinationPath = "upload_destination";
 
         return this.storeFile(multipartFile, destinationPath, false);

@@ -26,7 +26,7 @@ public interface FileStorageService {
 
     public Resource getFileAsResource(String name, String path) throws MalformedURLException;
 
-    public String generateLink(String sourcePath, String uploadDestinationPath);
+    public String generateFolderLink(String sourcePath, String uploadDestinationPath);
 
     public List<FileEntity> findInEncryptedPath(String encryptedPath);
 

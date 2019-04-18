@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import raf.bullets.storage.dto.FileEntity;
-import raf.bullets.storage.dto.responses.GeneratedLinkResponse;
 import raf.bullets.storage.service.FileStorageService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +19,6 @@ import java.util.List;
 public class FileController {
 
     private FileStorageService fileStorageService;
-
 
     public FileController(FileStorageService fileStorageService) {
         this.fileStorageService = fileStorageService;
@@ -78,26 +76,5 @@ public class FileController {
     @PostMapping("/folder")
     public ResponseEntity<FileEntity> newFolder(@RequestParam("path") String path, @RequestParam("name") String name) {
         return new ResponseEntity<>(this.fileStorageService.newFolder(path, name), HttpStatus.CREATED);
-    }
-
-    @RequestMapping(value = "link", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<GeneratedLinkResponse> generateLink(@RequestParam("source_path") String sourcePath,
-                                                              @RequestParam("upload_destination_path") String uploadDestinationPath) {
-
-        return new ResponseEntity<>(new GeneratedLinkResponse(this.fileStorageService.generateLink(sourcePath, uploadDestinationPath)), HttpStatus.CREATED);
-    }
-
-    @GetMapping("link/{encrypted_path}")
-    public ResponseEntity<List<FileEntity>> listFilesFromLinkedFolder(@PathVariable("encrypted_path") String encryptedPath) {
-
-        return new ResponseEntity<>(this.fileStorageService.findInEncryptedPath(encryptedPath), HttpStatus.OK);
-    }
-
-    @PostMapping("link/{encrypted_path}")
-    public ResponseEntity uploadFileForLinkedFolder(@RequestParam("file") MultipartFile multipartFile,
-                                                    @PathVariable("encrypted_path") String encryptedPath) throws IOException {
-
-        this.fileStorageService.uploadToEncryptedPath(multipartFile, encryptedPath);
-        return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 }
