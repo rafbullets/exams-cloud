@@ -21,9 +21,6 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
 
-    @Autowired
-    private Environment environment;
-
     @Override
     public Resource getFileAsResource(String name, String path) throws MalformedURLException {
         File file1 = FilesMockery.findFile(name, path);
@@ -61,7 +58,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public FileEntity storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException {
+    public FileEntity storeFile(MultipartFile multipartFile, String path) throws IOException {
         //TODO: Store file using component and archive if it is requested
 
         File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
@@ -69,26 +66,6 @@ public class FileStorageServiceImpl implements FileStorageService {
         FileOutputStream fileOutputStream = new FileOutputStream(file);
         fileOutputStream.write(multipartFile.getBytes());
         fileOutputStream.close();
-
-        if(asArchive) {
-            File fileForZip = new File(file.getName()+".zip");
-            FileOutputStream fos = new FileOutputStream(fileForZip);
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
-
-            FileInputStream fis = new FileInputStream(file);
-            ZipEntry zipEntry = new ZipEntry(file.getName());
-            zipOut.putNextEntry(zipEntry);
-            byte[] bytes = new byte[1024];
-            int length;
-            while((length = fis.read(bytes)) >= 0) {
-                zipOut.write(bytes, 0, length);
-            }
-            zipOut.close();
-            fis.close();
-            fos.close();
-
-            file = fileForZip;
-        }
 
         return FilesMockery.newFile(file, path);
     }
@@ -124,6 +101,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         zipOut.close();
         fos.close();
 
+        files.stream().forEach(File::delete);
         files.clear();
         files.add(fileForZip);
 
@@ -171,7 +149,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         //TODO: get destination path from file's metadata
         String destinationPath = "upload_destination";
 
-        return this.storeFile(multipartFile, destinationPath, false);
+        return this.storeFile(multipartFile, destinationPath);
     }
 
 }
