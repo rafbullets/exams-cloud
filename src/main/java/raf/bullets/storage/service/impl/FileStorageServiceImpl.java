@@ -94,7 +94,44 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path, boolean asArchive) throws IOException {
+    public List<FileEntity> storeFilesAsArchive(MultipartFile[] multipartFiles, String path, String archiveName) throws IOException {
+        ArrayList<File> files = new ArrayList<>(multipartFiles.length);
+
+        for (MultipartFile multipartFile : multipartFiles) {
+            File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(multipartFile.getBytes());
+            fos.close();
+
+            files.add(file);
+        }
+
+        File fileForZip = new File(archiveName);
+        FileOutputStream fos = new FileOutputStream(fileForZip);
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        for (File file : files) {
+            FileInputStream fis = new FileInputStream(file);
+            ZipEntry zipEntry = new ZipEntry(file.getName());
+            zipOut.putNextEntry(zipEntry);
+
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
+        }
+        zipOut.close();
+        fos.close();
+
+        files.clear();
+        files.add(fileForZip);
+
+        return FilesMockery.newFiles(files, path);
+    }
+
+    @Override
+    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path) throws IOException {
         //TODO: Store file using component and archive if it is requested
 
         ArrayList<File> files = new ArrayList<>(multipartFiles.length);
@@ -108,29 +145,6 @@ public class FileStorageServiceImpl implements FileStorageService {
 
 
             files.add(file);
-        }
-
-        if(asArchive) {
-            File fileForZip = new File("multiCompressed.zip");
-            FileOutputStream fos = new FileOutputStream(fileForZip);
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
-            for (File file : files) {
-                FileInputStream fis = new FileInputStream(file);
-                ZipEntry zipEntry = new ZipEntry(file.getName());
-                zipOut.putNextEntry(zipEntry);
-
-                byte[] bytes = new byte[1024];
-                int length;
-                while((length = fis.read(bytes)) >= 0) {
-                    zipOut.write(bytes, 0, length);
-                }
-                fis.close();
-            }
-            zipOut.close();
-            fos.close();
-
-            files.clear();
-            files.add(fileForZip);
         }
 
         return FilesMockery.newFiles(files, path);

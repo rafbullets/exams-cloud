@@ -22,7 +22,9 @@ public interface FileStorageService {
 
     public FileEntity storeFile(MultipartFile multipartFile, String path, boolean asArchive) throws IOException;
 
-    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path, boolean asArchive) throws IOException;
+    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path) throws IOException;
+
+    public List<FileEntity> storeFilesAsArchive(MultipartFile[] multipartFiles, String path, String archiveName) throws IOException;
 
     public Resource getFileAsResource(String name, String path) throws MalformedURLException;
 

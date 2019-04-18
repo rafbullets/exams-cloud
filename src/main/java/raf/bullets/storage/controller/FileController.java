@@ -53,9 +53,14 @@ public class FileController {
     @PostMapping(value =  "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<List<FileEntity>> uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles,
                                                         @RequestParam("path") String path,
-                                                        @RequestParam(value = "archive", required = false) boolean asArchive) throws IOException {
+                                                        @RequestParam(value = "archive", required = false) boolean asArchive,
+                                                        @RequestParam(value = "archive_name", required = false) String archiveName) throws IOException {
 
-        return new ResponseEntity<>(this.fileStorageService.storeFiles(multipartFiles, path, asArchive), HttpStatus.CREATED);
+        if (asArchive) {
+            return new ResponseEntity<>(this.fileStorageService.storeFilesAsArchive(multipartFiles, path, archiveName), HttpStatus.CREATED);
+        }
+
+        return new ResponseEntity<>(this.fileStorageService.storeFiles(multipartFiles, path), HttpStatus.CREATED);
     }
 
     @PostMapping("/rename")
