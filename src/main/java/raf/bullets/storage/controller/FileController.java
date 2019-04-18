@@ -25,7 +25,7 @@ public class FileController {
     }
 
     @RequestMapping(value = "", method = { RequestMethod.GET, RequestMethod.POST })
-    public ResponseEntity<List<FileEntity>> getFiles(@CookieValue("storage") String storageCookie,
+    public ResponseEntity<List<FileEntity>> getFiles(@CookieValue(value = "storage", required = false) String storageCookie,
                                                      @RequestParam("path") String path) {
         System.out.println(storageCookie);
         return new ResponseEntity<>(this.fileStorageService.findInPath(path), HttpStatus.OK);
