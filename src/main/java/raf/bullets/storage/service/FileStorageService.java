@@ -26,7 +26,7 @@ public interface FileStorageService {
 
     public List<FileEntity> storeFilesAsArchive(MultipartFile[] multipartFiles, String path, String archiveName) throws Exception;
 
-    public Resource getFileAsResource(String name, String path) throws MalformedURLException;
+    public Resource getFileAsResource(String name, String path) throws Exception;
 
     public String generateFolderLink(String sourcePath, String uploadDestinationPath);
 

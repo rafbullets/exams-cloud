@@ -24,6 +24,7 @@ import specification.storage.StorageOperations;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -41,8 +42,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     private String rootPath;
     public FileStorageServiceImpl() {
 
-        loadLocal();
-//        loadDropbox();
+//        loadLocal();
+        loadDropbox();
 
         ArrayList<String> forbidden = new ArrayList<>();
         forbidden.add("bat");
@@ -72,8 +73,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Resource getFileAsResource(String name, String path) throws MalformedURLException {
-        File file1 = FilesMockery.findFile(name, path);
+    public Resource getFileAsResource(String name, String path) throws Exception {
+        File file1 = this.fileBasicOperations.downloadFile(path, name, "./tmp/"+name).getFile();
 
         return new UrlResource(file1.toURI());
     }
@@ -173,8 +174,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String generateFolderLink(String sourcePath, String uploadDestinationPath) {
-        //TODO: store uploadDestinationPath as metadata
-
+        this.folderBasicOperations.updateMetadata(Paths.get(sourcePath).getParent().toString(), Paths.get(sourcePath).getFileName().toString(), uploadDestinationPath);
         return Helper.url("/link/"+Helper.base64Encode(sourcePath));
     }
 
