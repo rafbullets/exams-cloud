@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import raf.bullets.storage.dto.FileEntity;
 import raf.bullets.storage.service.FileStorageService;
 
@@ -26,8 +27,7 @@ public class FileController {
 
     @RequestMapping(value = "", method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseEntity<List<FileEntity>> getFiles(@CookieValue(value = "storage", required = false) String storageCookie,
-                                                     @RequestParam("path") String path) {
-        System.out.println(storageCookie);
+                                                     @RequestParam("path") String path) throws Exception {
         return new ResponseEntity<>(this.fileStorageService.findInPath(path), HttpStatus.OK);
     }
 

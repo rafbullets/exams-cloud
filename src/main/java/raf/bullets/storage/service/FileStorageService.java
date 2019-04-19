@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public interface FileStorageService {
 
-    public List<FileEntity> findInPath(String path);
+    public List<FileEntity> findInPath(String path) throws Exception;
 
     public FileEntity rename(String path, String oldName, String newName) throws Exception;
 
@@ -30,7 +30,7 @@ public interface FileStorageService {
 
     public String generateFolderLink(String sourcePath, String uploadDestinationPath);
 
-    public List<FileEntity> findInEncryptedPath(String encryptedPath);
+    public List<FileEntity> findInEncryptedPath(String encryptedPath) throws Exception;
 
     public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws IOException;
 

@@ -1,6 +1,7 @@
 package raf.bullets.storage.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -10,6 +11,7 @@ import raf.bullets.storage.dto.FileEntity;
 import raf.bullets.storage.helper.Helper;
 import raf.bullets.storage.modked_data.FilesMockery;
 import raf.bullets.storage.service.FileStorageService;
+import specification.operations.folder.FolderBasicOperations;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -21,6 +23,8 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
 
+    private FolderBasicOperations folderBasicOperations;
+
     @Override
     public Resource getFileAsResource(String name, String path) throws MalformedURLException {
         File file1 = FilesMockery.findFile(name, path);
@@ -29,8 +33,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public List<FileEntity> findInPath(String path) {
-        //TODO: Get files from component!
+    public List<FileEntity> findInPath(String path) throws Exception {
+        folderBasicOperations.listFolder(path, "");
 
         return FilesMockery.findInPath(path);
     }
@@ -136,7 +140,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public List<FileEntity> findInEncryptedPath(String encryptedPath) {
+    public List<FileEntity> findInEncryptedPath(String encryptedPath) throws Exception {
         String decryptedPath = Helper.base64Decode(encryptedPath);
 
         return this.findInPath(decryptedPath);
