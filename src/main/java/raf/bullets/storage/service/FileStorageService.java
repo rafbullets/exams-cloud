@@ -18,13 +18,13 @@ public interface FileStorageService {
 
     public boolean delete(String path, String name) throws Exception;
 
-    public FileEntity newFolder(String path, String name);
+    public FileEntity newFolder(String path, String name) throws Exception;
 
-    public FileEntity storeFile(MultipartFile multipartFile, String path) throws IOException;
+    public FileEntity storeFile(MultipartFile multipartFile, String path) throws Exception;
 
-    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path) throws IOException;
+    public List<FileEntity> storeFiles(MultipartFile[] multipartFiles, String path) throws Exception;
 
-    public List<FileEntity> storeFilesAsArchive(MultipartFile[] multipartFiles, String path, String archiveName) throws IOException;
+    public List<FileEntity> storeFilesAsArchive(MultipartFile[] multipartFiles, String path, String archiveName) throws Exception;
 
     public Resource getFileAsResource(String name, String path) throws MalformedURLException;
 
@@ -32,6 +32,6 @@ public interface FileStorageService {
 
     public List<FileEntity> findInEncryptedPath(String encryptedPath) throws Exception;
 
-    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws IOException;
+    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws Exception;
 
 }

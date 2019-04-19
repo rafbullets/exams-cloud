@@ -29,14 +29,14 @@ public class EncryptedLinkController {
     }
 
     @GetMapping("/{encrypted_path}")
-    public ResponseEntity<List<FileEntity>> listFilesFromLinkedFolder(@PathVariable("encrypted_path") String encryptedPath) {
+    public ResponseEntity<List<FileEntity>> listFilesFromLinkedFolder(@PathVariable("encrypted_path") String encryptedPath) throws Exception {
 
         return new ResponseEntity<>(this.fileStorageService.findInEncryptedPath(encryptedPath), HttpStatus.OK);
     }
 
     @PostMapping("/{encrypted_path}")
     public ResponseEntity uploadFileForLinkedFolder(@RequestParam("file") MultipartFile multipartFile,
-                                                    @PathVariable("encrypted_path") String encryptedPath) throws IOException {
+                                                    @PathVariable("encrypted_path") String encryptedPath) throws Exception {
 
         this.fileStorageService.uploadToEncryptedPath(multipartFile, encryptedPath);
         return new ResponseEntity(HttpStatus.ACCEPTED);

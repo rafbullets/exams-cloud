@@ -56,7 +56,7 @@ public class FileController {
     public ResponseEntity<List<FileEntity>> uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles,
                                                         @RequestParam("path") String path,
                                                         @RequestParam(value = "archive", required = false) boolean asArchive,
-                                                        @RequestParam(value = "archive_name", required = false) String archiveName) throws IOException {
+                                                        @RequestParam(value = "archive_name", required = false) String archiveName) throws Exception {
 
         if (asArchive) {
             return new ResponseEntity<>(this.fileStorageService.storeFilesAsArchive(multipartFiles, path, archiveName), HttpStatus.CREATED);
@@ -81,7 +81,7 @@ public class FileController {
     }
 
     @PostMapping("/folder")
-    public ResponseEntity<FileEntity> newFolder(@RequestParam("path") String path, @RequestParam("name") String name) {
+    public ResponseEntity<FileEntity> newFolder(@RequestParam("path") String path, @RequestParam("name") String name) throws Exception {
         return new ResponseEntity<>(this.fileStorageService.newFolder(path, name), HttpStatus.CREATED);
     }
 }
