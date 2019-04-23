@@ -36,9 +36,11 @@ public class EncryptedLinkController {
 
     @PostMapping("/{encrypted_path}")
     public ResponseEntity uploadFileForLinkedFolder(@RequestParam("file") MultipartFile multipartFile,
+                                                    @RequestParam("student") String studentData,
                                                     @PathVariable("encrypted_path") String encryptedPath) throws Exception {
 
-        this.fileStorageService.uploadToEncryptedPath(multipartFile, encryptedPath);
+        System.out.println(studentData);
+        this.fileStorageService.uploadToEncryptedPath(multipartFile, encryptedPath, studentData);
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 }

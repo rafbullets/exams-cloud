@@ -1,5 +1,7 @@
 package raf.bullets.storage.service.impl;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
@@ -14,6 +16,7 @@ import raf.bullets.storage.dto.FileType;
 import raf.bullets.storage.helper.Helper;
 import raf.bullets.storage.modked_data.FilesMockery;
 import raf.bullets.storage.service.FileStorageService;
+import specification.model.FileWrapper;
 import specification.model.FolderResult;
 import specification.model.FolderWrapper;
 import specification.operations.CommonOperations;
@@ -174,7 +177,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String generateFolderLink(String sourcePath, String uploadDestinationPath) {
-        this.folderBasicOperations.updateMetadata(Paths.get(sourcePath).getParent().toString(), Paths.get(sourcePath).getFileName().toString(), uploadDestinationPath);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("destination_path", uploadDestinationPath);
+        this.folderBasicOperations.updateMetadata(Paths.get(sourcePath).getParent().toString(), Paths.get(sourcePath).getFileName().toString(), jsonObject.toString());
         return Helper.url("/link/"+Helper.base64Encode(sourcePath));
     }
 
@@ -186,13 +191,24 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws Exception {
+    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath, String studentData) throws Exception {
         byte[] decodedBytes = Base64.getUrlDecoder().decode(encryptedPath);
         String decryptedPath = new String(decodedBytes);
-        //TODO: get destination path from file's metadata
-        String destinationPath = "upload_destination";
 
+//        System.out.println("parent: "+Paths.get(decryptedPath).getParent().toString());
+//        System.out.println("name: "+Paths.get(decryptedPath).getFileName().toString());
+
+        String metadata = this.folderBasicOperations.listFolder(Paths.get(decryptedPath).getParent().toString(), Paths.get(decryptedPath).getFileName().toString()).getMetadata();
+        System.out.println("meta: "+metadata);
+
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse(metadata).getAsJsonObject();
+
+        String destinationPath = o.get("destination_path").getAsString();
+
+        System.out.println("des: "+destinationPath);
         return this.storeFile(multipartFile, destinationPath);
     }
+
 
 }

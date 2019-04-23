@@ -32,6 +32,6 @@ public interface FileStorageService {
 
     public List<FileEntity> findInEncryptedPath(String encryptedPath) throws Exception;
 
-    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath) throws Exception;
+    public FileEntity uploadToEncryptedPath(MultipartFile multipartFile, String encryptedPath, String studentData) throws Exception;
 
 }
